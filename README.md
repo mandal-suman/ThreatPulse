@@ -1,4 +1,4 @@
-# ThreatPulse 🛡️
+# ThreatPulse
 
 A modern, responsive web application that aggregates cybersecurity news from multiple trusted sources using RSS feeds. Built with Python, Flask, and Google Gemini AI.
 
@@ -17,14 +17,14 @@ A modern, responsive web application that aggregates cybersecurity news from mul
 - **Sort Options**: View articles by newest or oldest first
 - **Responsive Design**: Optimized for desktop, tablet, and mobile devices
 
-### 🤖 AI-Powered Features
+### AI-Powered Features
 - **Severity Classification**: Google Gemini AI automatically classifies articles as HIGH 🔴, MEDIUM 🟠, or LOW 🟢 severity
 - **Intelligent Reasoning**: Hover over severity badges to see AI's explanation for classification
 - **Background Processing**: Articles load instantly, AI classification happens asynchronously
 - **Smart Caching**: Prevents redundant API calls for previously classified articles
 - **Industry Standards**: Classifications based on cybersecurity best practices
 
-### 🎨 User Interface
+### User Interface
 - **Desktop Top Taskbar**: All filters, search, and controls organized in a clean top bar
 - **Mobile Bottom Bar**: Touch-optimized navigation with filter drawer
 - **8+ Color Palettes**: Blue, Purple, Green, Orange, Red, Pink, Teal, Indigo themes
@@ -33,7 +33,7 @@ A modern, responsive web application that aggregates cybersecurity news from mul
 - **Smooth Animations**: Fade-in effects and transitions throughout
 - **Font Awesome Icons**: Professional visual indicators
 
-### 🔍 Filtering & Organization
+### Filtering & Organization
 - **Source Filtering**: Filter by specific news sources or view all
 - **Severity Filtering**: Filter articles by AI-classified severity level
 - **Combined Filters**: Stack source, severity, and search filters
