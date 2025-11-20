@@ -40,6 +40,16 @@ A modern, responsive web application that aggregates cybersecurity news from mul
 - **Filter Persistence**: Filters maintained across pagination
 - **Results Summary**: Clear display of current page and total articles
 
+## 📸 Screenshots
+
+### Desktop View - AI Severity Classification
+![Desktop Interface](static/images/img-1.png)
+*Desktop view showing the top taskbar with filters, search functionality, and AI-powered severity badges (HIGH/MEDIUM/LOW) on article cards*
+
+### Mobile View - Responsive Design
+![Mobile Interface](static/images/img-2.png)
+*Mobile-optimized view with bottom navigation bar and filter drawer for seamless browsing on any device*
+
 ## 🚀 Quick Start
 
 ### Prerequisites
