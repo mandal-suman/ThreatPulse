@@ -1,0 +1,640 @@
+{% extends "base.html" %}
+
+{% block title %}Latest Cybersecurity News - ThreatPulse{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <h2><i class="fas fa-newspaper"></i> Latest Cybersecurity News</h2>
+    <p class="subtitle">Stay updated with the latest security threats, vulnerabilities, and industry news</p>
+    {% if last_updated %}
+    <p class="last-updated">
+        <i class="fas fa-clock"></i> Last updated: {{ last_updated | time_ago }}
+        <span class="auto-refresh-indicator">
+            <i class="fas fa-sync-alt"></i> Auto-refreshes every 5 minutes
+        </span>
+    </p>
+    {% endif %}
+    {% if not classification_complete %}
+    <p class="classification-status" id="classificationStatus">
+        <i class="fas fa-spinner fa-spin"></i> AI severity classification in progress...
+    </p>
+    {% endif %}
+</div>
+
+<!-- Mobile Filter Toggle Button and Search -->
+<div class="mobile-bottom-bar">
+    <div class="mobile-search-wrapper">
+        <input type="text" 
+               class="mobile-search-input" 
+               id="mobileSearchInput" 
+               placeholder="Search articles..." 
+               value="{{ search_query or '' }}" 
+               onkeypress="handleMobileSearchEnter(event)">
+        {% if search_query %}
+        <button class="mobile-clear-search" onclick="clearSearch()" title="Clear search">
+            <i class="fas fa-times"></i>
+        </button>
+        {% endif %}
+    </div>
+    <button class="mobile-search-btn" onclick="performMobileSearch()">
+        <i class="fas fa-search"></i>
+    </button>
+    <button class="mobile-filter-toggle" onclick="toggleMobileFilters()">
+        <i class="fas fa-sliders-h"></i>
+    </button>
+</div>
+
+<!-- Mobile Bottom Filter Bar -->
+<div class="mobile-filter-bar" id="mobileFilterBar">
+    <div class="mobile-filter-header">
+        <h3><i class="fas fa-sliders-h"></i> Filters & Options</h3>
+        <button class="close-mobile-filter" onclick="toggleMobileFilters()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="mobile-filter-content">
+        <div class="mobile-filter-group">
+            <h4><i class="fas fa-filter"></i> Source</h4>
+            <div class="mobile-filter-options">
+                <a href="/?source=all&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if selected_source == 'all' %}active{% endif %}">
+                    All Sources
+                </a>
+                {% for source in sources %}
+                <a href="/?source={{ source }}&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if selected_source == source %}active{% endif %}">
+                    {{ source }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="mobile-filter-group">
+            <h4><i class="fas fa-shield-alt"></i> Severity</h4>
+            <div class="mobile-filter-options">
+                <a href="/?source={{ selected_source }}&severity=all&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if selected_severity == 'all' %}active{% endif %}">
+                    All Levels
+                </a>
+                <a href="/?source={{ selected_source }}&severity=high&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option severity-high {% if selected_severity == 'high' %}active{% endif %}">
+                    <i class="fas fa-exclamation-triangle"></i> High
+                </a>
+                <a href="/?source={{ selected_source }}&severity=medium&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option severity-medium {% if selected_severity == 'medium' %}active{% endif %}">
+                    <i class="fas fa-exclamation-circle"></i> Medium
+                </a>
+                <a href="/?source={{ selected_source }}&severity=low&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option severity-low {% if selected_severity == 'low' %}active{% endif %}">
+                    <i class="fas fa-info-circle"></i> Low
+                </a>
+            </div>
+        </div>
+        
+        <div class="mobile-filter-group">
+            <h4><i class="fas fa-list"></i> Per Page</h4>
+            <div class="mobile-filter-options mobile-per-page-grid">
+                <a href="/?source={{ selected_source }}&per_page=6&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if per_page == 6 %}active{% endif %}">6</a>
+                <a href="/?source={{ selected_source }}&per_page=12&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if per_page == 12 %}active{% endif %}">12</a>
+                <a href="/?source={{ selected_source }}&per_page=24&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if per_page == 24 %}active{% endif %}">24</a>
+                <a href="/?source={{ selected_source }}&per_page=48&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if per_page == 48 %}active{% endif %}">48</a>
+                <a href="/?source={{ selected_source }}&per_page=0&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if per_page == 0 %}active{% endif %}">All</a>
+            </div>
+        </div>
+        
+        <div class="mobile-filter-group">
+            <h4><i class="fas fa-sort"></i> Sort By</h4>
+            <div class="mobile-filter-options">
+                <a href="/?source={{ selected_source }}&per_page={{ per_page }}&sort=newest{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if sort_order == 'newest' %}active{% endif %}">
+                    <i class="fas fa-arrow-down"></i> Newest First
+                </a>
+                <a href="/?source={{ selected_source }}&per_page={{ per_page }}&sort=oldest{% if search_query %}&search={{ search_query }}{% endif %}" class="mobile-filter-option {% if sort_order == 'oldest' %}active{% endif %}">
+                    <i class="fas fa-arrow-up"></i> Oldest First
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Desktop Top Taskbar - All Filters and Controls -->
+<div class="desktop-top-taskbar">
+    <!-- Row 1: Source and Severity Filters -->
+    <div class="taskbar-row">
+        <div class="taskbar-section">
+            <div class="taskbar-label">
+                <i class="fas fa-filter"></i> Source:
+            </div>
+            <div class="taskbar-buttons">
+                <a href="/?source=all&severity={{ selected_severity }}&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="taskbar-btn {% if selected_source == 'all' %}active{% endif %}">
+                    All Sources
+                </a>
+                {% for source in sources %}
+                <a href="/?source={{ source }}&severity={{ selected_severity }}&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="taskbar-btn {% if selected_source == source %}active{% endif %}">
+                    {{ source }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="taskbar-section">
+            <div class="taskbar-label">
+                <i class="fas fa-shield-alt"></i> Severity:
+            </div>
+            <div class="taskbar-buttons">
+                <a href="/?source={{ selected_source }}&severity=all&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="taskbar-btn {% if selected_severity == 'all' %}active{% endif %}">
+                    All
+                </a>
+                <a href="/?source={{ selected_source }}&severity=high&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="taskbar-btn severity-high {% if selected_severity == 'high' %}active{% endif %}">
+                    <i class="fas fa-exclamation-triangle"></i> High
+                </a>
+                <a href="/?source={{ selected_source }}&severity=medium&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="taskbar-btn severity-medium {% if selected_severity == 'medium' %}active{% endif %}">
+                    <i class="fas fa-exclamation-circle"></i> Medium
+                </a>
+                <a href="/?source={{ selected_source }}&severity=low&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="taskbar-btn severity-low {% if selected_severity == 'low' %}active{% endif %}">
+                    <i class="fas fa-info-circle"></i> Low
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Row 2: Search, Per Page, Sort, and Info -->
+    <div class="taskbar-row taskbar-controls">
+        <div class="taskbar-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="searchInput" placeholder="Search articles..." value="{{ search_query or '' }}" onkeypress="handleSearchEnter(event)">
+            <button class="search-btn" onclick="performSearch()">Search</button>
+            {% if search_query %}
+            <button class="clear-search-btn" onclick="clearSearch()" title="Clear search">
+                <i class="fas fa-times"></i>
+            </button>
+            {% endif %}
+        </div>
+        
+        <div class="taskbar-selectors">
+            <div class="taskbar-select-group">
+                <label for="perPage"><i class="fas fa-list"></i> Per page:</label>
+                <select id="perPage" onchange="changePerPage(this.value)">
+                    <option value="6" {% if per_page == 6 %}selected{% endif %}>6</option>
+                    <option value="12" {% if per_page == 12 %}selected{% endif %}>12</option>
+                    <option value="24" {% if per_page == 24 %}selected{% endif %}>24</option>
+                    <option value="48" {% if per_page == 48 %}selected{% endif %}>48</option>
+                    <option value="0" {% if per_page == 0 %}selected{% endif %}>All</option>
+                </select>
+            </div>
+            
+            <div class="taskbar-select-group">
+                <label for="sortOrder"><i class="fas fa-sort"></i> Sort:</label>
+                <select id="sortOrder" onchange="changeSortOrder(this.value)">
+                    <option value="newest" {% if sort_order == 'newest' %}selected{% endif %}>Newest First</option>
+                    <option value="oldest" {% if sort_order == 'oldest' %}selected{% endif %}>Oldest First</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="taskbar-info">
+            {% if per_page == 0 %}
+                Showing all {{ total_articles }} articles
+            {% else %}
+                Showing {{ ((current_page - 1) * per_page) + 1 }} - {{ [current_page * per_page, total_articles]|min }} of {{ total_articles }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="articles-grid">
+    {% if articles %}
+        {% for article in articles %}
+        <article class="article-card">
+            <div class="article-header">
+                <div class="article-meta-left">
+                    <span class="article-source">{{ article.source }}</span>
+                    {% if article.severity %}
+                    <span class="severity-badge severity-{{ article.severity|lower }}" 
+                          title="{{ article.severity_reasoning }}"
+                          data-reasoning="{{ article.severity_reasoning }}">
+                        <i class="fas fa-shield-alt"></i> {{ article.severity }}
+                    </span>
+                    {% endif %}
+                </div>
+                <span class="article-time">
+                    <i class="far fa-clock"></i> {{ article.published | time_ago }}
+                </span>
+            </div>
+            <h3 class="article-title">
+                <a href="{{ article.link }}" target="_blank" rel="noopener noreferrer">
+                    {{ article.title }}
+                </a>
+            </h3>
+            <p class="article-summary">{{ article.summary }}</p>
+            <div class="article-footer">
+                {% if article.author != 'Unknown' %}
+                <span class="article-author">
+                    <i class="fas fa-user"></i> {{ article.author }}
+                </span>
+                {% endif %}
+                <div class="article-actions">
+                    <a href="#" class="read-more" onclick="openReadingPanel(event, '{{ article.link }}', '{{ article.title }}', '{{ article.source }}'); return false;">
+                        Read More <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="{{ article.link }}" target="_blank" class="external-link" rel="noopener noreferrer" title="Open in new tab">
+                        <i class="fas fa-external-link-alt"></i>
+                    </a>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    {% else %}
+        <div class="no-articles">
+            <i class="fas fa-inbox"></i>
+            <p>No articles found. Try refreshing or selecting a different source.</p>
+        </div>
+    {% endif %}
+</div>
+
+{% if per_page != 0 and total_pages > 1 %}
+<div class="pagination">
+    <div class="pagination-info">
+        Page {{ current_page }} of {{ total_pages }}
+    </div>
+    
+    <div class="pagination-buttons">
+        {% if current_page > 1 %}
+        <a href="/?source={{ selected_source }}&severity={{ selected_severity }}&page=1&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-btn" title="First page">
+            <i class="fas fa-angle-double-left"></i>
+        </a>
+        <a href="/?source={{ selected_source }}&severity={{ selected_severity }}&page={{ current_page - 1 }}&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-btn" title="Previous page">
+            <i class="fas fa-angle-left"></i> Previous
+        </a>
+        {% else %}
+        <button class="pagination-btn disabled" disabled>
+            <i class="fas fa-angle-double-left"></i>
+        </button>
+        <button class="pagination-btn disabled" disabled>
+            <i class="fas fa-angle-left"></i> Previous
+        </button>
+        {% endif %}
+        
+        <div class="pagination-numbers">
+            {% set start_page = [1, current_page - 2]|max %}
+            {% set end_page = [total_pages, current_page + 2]|min %}
+            
+            {% if start_page > 1 %}
+                <a href="/?source={{ selected_source }}&severity={{ selected_severity }}&page=1&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-number">1</a>
+                {% if start_page > 2 %}
+                    <span class="pagination-ellipsis">...</span>
+                {% endif %}
+            {% endif %}
+            
+            {% for page_num in range(start_page, end_page + 1) %}
+                {% if page_num == current_page %}
+                    <span class="pagination-number active">{{ page_num }}</span>
+                {% else %}
+                    <a href="/?source={{ selected_source }}&severity={{ selected_severity }}&page={{ page_num }}&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-number">{{ page_num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if end_page < total_pages %}
+                {% if end_page < total_pages - 1 %}
+                    <span class="pagination-ellipsis">...</span>
+                {% endif %}
+                <a href="/?source={{ selected_source }}&severity={{ selected_severity }}&page={{ total_pages }}&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-number">{{ total_pages }}</a>
+            {% endif %}
+        </div>
+        
+        {% if current_page < total_pages %}
+        <a href="/?source={{ selected_source }}&severity={{ selected_severity }}&page={{ current_page + 1 }}&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-btn" title="Next page">
+            Next <i class="fas fa-angle-right"></i>
+        </a>
+        <a href="/?source={{ selected_source }}&severity={{ selected_severity }}&page={{ total_pages }}&per_page={{ per_page }}&sort={{ sort_order }}{% if search_query %}&search={{ search_query }}{% endif %}" class="pagination-btn" title="Last page">
+            <i class="fas fa-angle-double-right"></i>
+        </a>
+        {% else %}
+        <button class="pagination-btn disabled" disabled>
+            Next <i class="fas fa-angle-right"></i>
+        </button>
+        <button class="pagination-btn disabled" disabled>
+            <i class="fas fa-angle-double-right"></i>
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% if articles|length > 0 %}
+<div class="results-summary">
+    <p>
+        <i class="fas fa-info-circle"></i>
+        {% if search_query %}
+            Search results for "<strong>{{ search_query }}</strong>": 
+        {% endif %}
+        {% if per_page == 0 %}
+            Displaying all <strong>{{ total_articles }}</strong> articles
+        {% else %}
+            Page <strong>{{ current_page }}</strong> of <strong>{{ total_pages }}</strong> 
+            ({{ total_articles }} total articles)
+        {% endif %}
+    </p>
+</div>
+{% else %}
+<div class="results-summary">
+    <p>
+        <i class="fas fa-exclamation-circle"></i>
+        {% if search_query %}
+            No articles found for "<strong>{{ search_query }}</strong>". Try a different search term.
+        {% else %}
+            No articles available.
+        {% endif %}
+    </p>
+</div>
+{% endif %}
+
+<!-- Reading Panel -->
+<div id="readingPanel" class="reading-panel">
+    <div class="reading-panel-header">
+        <div class="reading-panel-title">
+            <h3 id="readingPanelTitle">Article Title</h3>
+            <span id="readingPanelSource" class="reading-source-badge"></span>
+        </div>
+        <button class="close-panel" onclick="closeReadingPanel()">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+    <div class="reading-panel-content">
+        <div class="loading-spinner" id="readingSpinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Loading article...</p>
+        </div>
+        <div id="readingContent" class="article-reading-content"></div>
+        <div class="article-attribution">
+            <i class="fas fa-info-circle"></i>
+            <p>This article is provided for preview purposes. For the full experience and to support the original publisher, please visit: 
+                <a id="readingOriginalLink" href="#" target="_blank" rel="noopener noreferrer">View Original Article</a>
+            </p>
+        </div>
+    </div>
+</div>
+<div id="readingPanelOverlay" class="reading-panel-overlay" onclick="closeReadingPanel()"></div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Check classification status and reload when complete
+    {% if not classification_complete %}
+    function checkClassificationStatus() {
+        fetch('/api/classification-status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.classified) {
+                    // Classification complete, reload page to show severity badges
+                    const statusElement = document.getElementById('classificationStatus');
+                    if (statusElement) {
+                        statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Classification complete! Reloading...';
+                        statusElement.style.color = '#10b981';
+                    }
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    // Still classifying, check again in 3 seconds
+                    setTimeout(checkClassificationStatus, 3000);
+                }
+            })
+            .catch(error => {
+                console.error('Error checking classification status:', error);
+                // Retry in 5 seconds on error
+                setTimeout(checkClassificationStatus, 5000);
+            });
+    }
+    
+    // Start checking classification status
+    checkClassificationStatus();
+    {% endif %}
+    
+    // Search functions
+    function performSearch() {
+        const searchInput = document.getElementById('searchInput');
+        const searchQuery = searchInput.value.trim();
+        const urlParams = new URLSearchParams(window.location.search);
+        const source = urlParams.get('source') || 'all';
+        const severity = urlParams.get('severity') || 'all';
+        const perPage = urlParams.get('per_page') || '12';
+        const sort = urlParams.get('sort') || 'newest';
+        
+        if (searchQuery) {
+            window.location.href = `/?source=${source}&severity=${severity}&per_page=${perPage}&sort=${sort}&search=${encodeURIComponent(searchQuery)}&page=1`;
+        }
+    }
+    
+    function clearSearch() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const source = urlParams.get('source') || 'all';
+        const severity = urlParams.get('severity') || 'all';
+        const perPage = urlParams.get('per_page') || '12';
+        const sort = urlParams.get('sort') || 'newest';
+        
+        window.location.href = `/?source=${source}&severity=${severity}&per_page=${perPage}&sort=${sort}&page=1`;
+    }
+    
+    function handleSearchEnter(event) {
+        if (event.key === 'Enter') {
+            performSearch();
+        }
+    }
+    
+    // Mobile search functions
+    function performMobileSearch() {
+        const searchInput = document.getElementById('mobileSearchInput');
+        const searchQuery = searchInput.value.trim();
+        const urlParams = new URLSearchParams(window.location.search);
+        const source = urlParams.get('source') || 'all';
+        const severity = urlParams.get('severity') || 'all';
+        const perPage = urlParams.get('per_page') || '12';
+        const sort = urlParams.get('sort') || 'newest';
+        
+        if (searchQuery) {
+            window.location.href = `/?source=${source}&severity=${severity}&per_page=${perPage}&sort=${sort}&search=${encodeURIComponent(searchQuery)}&page=1`;
+        }
+    }
+    
+    function handleMobileSearchEnter(event) {
+        if (event.key === 'Enter') {
+            performMobileSearch();
+        }
+    }
+    
+    // Per page selector
+    function changePerPage(value) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const source = urlParams.get('source') || 'all';
+        const severity = urlParams.get('severity') || 'all';
+        const sort = urlParams.get('sort') || 'newest';
+        const search = urlParams.get('search') || '';
+        const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+        window.location.href = `/?source=${source}&severity=${severity}&per_page=${value}&sort=${sort}${searchParam}&page=1`;
+    }
+    
+    // Sort order selector
+    function changeSortOrder(value) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const source = urlParams.get('source') || 'all';
+        const severity = urlParams.get('severity') || 'all';
+        const perPage = urlParams.get('per_page') || '12';
+        const search = urlParams.get('search') || '';
+        const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+        window.location.href = `/?source=${source}&severity=${severity}&per_page=${perPage}&sort=${value}${searchParam}&page=1`;
+    }
+    
+    // Reading Panel Functions
+    function openReadingPanel(event, url, title, source) {
+        event.preventDefault();
+        
+        const panel = document.getElementById('readingPanel');
+        const overlay = document.getElementById('readingPanelOverlay');
+        const panelTitle = document.getElementById('readingPanelTitle');
+        const panelSource = document.getElementById('readingPanelSource');
+        const spinner = document.getElementById('readingSpinner');
+        const content = document.getElementById('readingContent');
+        const originalLink = document.getElementById('readingOriginalLink');
+        
+        // Set title and source
+        panelTitle.textContent = title;
+        panelSource.textContent = source;
+        originalLink.href = url;
+        
+        // Show panel and overlay
+        panel.classList.add('active');
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        // Show spinner, hide content
+        spinner.style.display = 'flex';
+        content.style.display = 'none';
+        content.innerHTML = '';
+        
+        // Fetch article content
+        fetch(`/api/article-content?url=${encodeURIComponent(url)}`)
+            .then(response => response.json())
+            .then(data => {
+                spinner.style.display = 'none';
+                
+                if (data.success) {
+                    content.innerHTML = data.content;
+                    content.style.display = 'block';
+                    
+                    // Scroll to top of content
+                    content.scrollTop = 0;
+                } else {
+                    // Handle different error types
+                    let errorIcon = 'fa-exclamation-circle';
+                    let errorTitle = 'Unable to Load Article';
+                    let errorMessage = data.message || 'We encountered an issue while loading this article.';
+                    
+                    if (data.error === 'forbidden') {
+                        errorIcon = 'fa-shield-alt';
+                        errorTitle = 'Access Restricted';
+                        errorMessage = 'We apologize, but this article cannot be displayed here due to security restrictions set by the publisher.';
+                    } else if (data.error === 'timeout') {
+                        errorIcon = 'fa-clock';
+                        errorTitle = 'Loading Timeout';
+                        errorMessage = 'The article took too long to load. Please try again or visit the original source.';
+                    }
+                    
+                    content.innerHTML = `
+                        <div class="error-message">
+                            <div class="error-icon">
+                                <i class="fas ${errorIcon}"></i>
+                            </div>
+                            <h3>${errorTitle}</h3>
+                            <p>${errorMessage}</p>
+                            <div class="error-actions">
+                                <a href="${data.url || url}" target="_blank" class="error-btn error-btn-primary" rel="noopener noreferrer">
+                                    <i class="fas fa-external-link-alt"></i> Read on Original Site
+                                </a>
+                                <button onclick="closeReadingPanel()" class="error-btn error-btn-secondary">
+                                    <i class="fas fa-times"></i> Close
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    content.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching article:', error);
+                spinner.style.display = 'none';
+                content.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>Failed to load article. Please try opening the original link.</p>
+                        <a href="${url}" target="_blank" class="btn-primary" rel="noopener noreferrer">
+                            <i class="fas fa-external-link-alt"></i> Open Original Article
+                        </a>
+                    </div>
+                `;
+                content.style.display = 'block';
+            });
+    }
+    
+    function closeReadingPanel() {
+        const panel = document.getElementById('readingPanel');
+        const overlay = document.getElementById('readingPanelOverlay');
+        
+        panel.classList.remove('active');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+    
+    // Close panel with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeReadingPanel();
+        }
+    });
+    
+    // Auto-refresh page every 5 minutes to show new articles
+    let autoRefreshInterval;
+    
+    function startAutoRefresh() {
+        // Refresh page every 5 minutes (300000 milliseconds)
+        autoRefreshInterval = setInterval(() => {
+            console.log('Auto-refreshing page...');
+            location.reload();
+        }, 5 * 60 * 1000);
+    }
+    
+    // Start auto-refresh when page loads
+    startAutoRefresh();
+    
+    // Add smooth scroll to top button
+    window.onscroll = function() {
+        const scrollBtn = document.getElementById('scrollTopBtn');
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            if (!scrollBtn) {
+                const btn = document.createElement('button');
+                btn.id = 'scrollTopBtn';
+                btn.className = 'scroll-top-btn';
+                btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+                btn.onclick = function() {
+                    window.scrollTo({top: 0, behavior: 'smooth'});
+                };
+                document.body.appendChild(btn);
+            }
+        } else {
+            if (scrollBtn) {
+                scrollBtn.remove();
+            }
+        }
+    };
+    
+    // Show notification when page is about to refresh
+    let refreshNotificationTimeout;
+    function showRefreshNotification() {
+        clearTimeout(refreshNotificationTimeout);
+        refreshNotificationTimeout = setTimeout(() => {
+            const notification = document.createElement('div');
+            notification.className = 'refresh-notification';
+            notification.innerHTML = '<i class="fas fa-sync-alt"></i> Refreshing articles...';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+        }, (5 * 60 * 1000) - 3000); // Show 3 seconds before refresh
+    }
+    
+    showRefreshNotification();
+</script>
+{% endblock %}

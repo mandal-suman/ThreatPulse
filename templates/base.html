@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ThreatPulse{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="light-mode">
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <button class="mobile-menu-toggle" onclick="toggleMobileMenu()" aria-label="Toggle menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <i class="fas fa-activity"></i>
+                    <h1><span class="logo-threat">Threat</span><span class="logo-pulse">Pulse</span></h1>
+                </div>
+                <nav class="nav" id="mainNav">
+                    <a href="/" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                        <i class="fas fa-home"></i> <span>Home</span>
+                    </a>
+                    <a href="/about" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">
+                        <i class="fas fa-info-circle"></i> <span>About</span>
+                    </a>
+                    <div class="theme-palette-group">
+                        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                        <button class="palette-toggle" onclick="togglePaletteMenu()" aria-label="Choose color palette">
+                            <i class="fas fa-palette"></i>
+                        </button>
+                    </div>
+                </nav>
+                
+                <!-- Color Palette Menu -->
+                <div class="palette-menu" id="paletteMenu">
+                    <div class="palette-menu-header">
+                        <h4><i class="fas fa-palette"></i> Choose Reading Theme</h4>
+                        <button class="close-palette-menu" onclick="togglePaletteMenu()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="palette-options">
+                        <button class="palette-option" data-palette="default" onclick="changePalette('default')">
+                            <div class="palette-preview">
+                                <span style="background: #2563eb;"></span>
+                                <span style="background: #3b82f6;"></span>
+                                <span style="background: #60a5fa;"></span>
+                                <span style="background: #93c5fd;"></span>
+                            </div>
+                            <span class="palette-name">Default Blue</span>
+                            <i class="fas fa-check palette-check"></i>
+                        </button>
+                        
+                        <button class="palette-option" data-palette="emerald" onclick="changePalette('emerald')">
+                            <div class="palette-preview">
+                                <span style="background: #059669;"></span>
+                                <span style="background: #10b981;"></span>
+                                <span style="background: #34d399;"></span>
+                                <span style="background: #6ee7b7;"></span>
+                            </div>
+                            <span class="palette-name">Emerald Green</span>
+                            <i class="fas fa-check palette-check"></i>
+                        </button>
+                        
+                        <button class="palette-option" data-palette="purple" onclick="changePalette('purple')">
+                            <div class="palette-preview">
+                                <span style="background: #7c3aed;"></span>
+                                <span style="background: #8b5cf6;"></span>
+                                <span style="background: #a78bfa;"></span>
+                                <span style="background: #c4b5fd;"></span>
+                            </div>
+                            <span class="palette-name">Royal Purple</span>
+                            <i class="fas fa-check palette-check"></i>
+                        </button>
+                        
+                        <button class="palette-option" data-palette="rose" onclick="changePalette('rose')">
+                            <div class="palette-preview">
+                                <span style="background: #e11d48;"></span>
+                                <span style="background: #f43f5e;"></span>
+                                <span style="background: #fb7185;"></span>
+                                <span style="background: #fda4af;"></span>
+                            </div>
+                            <span class="palette-name">Rose Pink</span>
+                            <i class="fas fa-check palette-check"></i>
+                        </button>
+                        
+                        <button class="palette-option" data-palette="amber" onclick="changePalette('amber')">
+                            <div class="palette-preview">
+                                <span style="background: #d97706;"></span>
+                                <span style="background: #f59e0b;"></span>
+                                <span style="background: #fbbf24;"></span>
+                                <span style="background: #fcd34d;"></span>
+                            </div>
+                            <span class="palette-name">Warm Amber</span>
+                            <i class="fas fa-check palette-check"></i>
+                        </button>
+                        
+                        <button class="palette-option" data-palette="cyan" onclick="changePalette('cyan')">
+                            <div class="palette-preview">
+                                <span style="background: #0891b2;"></span>
+                                <span style="background: #06b6d4;"></span>
+                                <span style="background: #22d3ee;"></span>
+                                <span style="background: #67e8f9;"></span>
+                            </div>
+                            <span class="palette-name">Ocean Cyan</span>
+                            <i class="fas fa-check palette-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <i class="fas fa-activity"></i>
+                    <h3><span class="logo-threat">Threat</span><span class="logo-pulse">Pulse</span></h3>
+                </div>
+                <p class="footer-description">Your trusted source for the latest cybersecurity news, threats, and vulnerabilities.</p>
+                <div class="footer-bottom">
+                    <p>&copy; 2025 ThreatPulse. All rights reserved.</p>
+                    <p class="footer-tech">Built with <i class="fas fa-heart"></i> using Flask & Python</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Color Palette Management
+        const palettes = {
+            default: {
+                light: {
+                    primary: '#2563eb',
+                    primaryHover: '#1d4ed8',
+                    secondary: '#3b82f6',
+                    accent: '#8b5cf6',
+                    accentHover: '#7c3aed'
+                },
+                dark: {
+                    primary: '#3b82f6',
+                    primaryHover: '#60a5fa',
+                    secondary: '#2563eb',
+                    accent: '#a78bfa',
+                    accentHover: '#c4b5fd'
+                }
+            },
+            emerald: {
+                light: {
+                    primary: '#059669',
+                    primaryHover: '#047857',
+                    secondary: '#10b981',
+                    accent: '#14b8a6',
+                    accentHover: '#0d9488'
+                },
+                dark: {
+                    primary: '#10b981',
+                    primaryHover: '#34d399',
+                    secondary: '#059669',
+                    accent: '#2dd4bf',
+                    accentHover: '#5eead4'
+                }
+            },
+            purple: {
+                light: {
+                    primary: '#7c3aed',
+                    primaryHover: '#6d28d9',
+                    secondary: '#8b5cf6',
+                    accent: '#a855f7',
+                    accentHover: '#9333ea'
+                },
+                dark: {
+                    primary: '#8b5cf6',
+                    primaryHover: '#a78bfa',
+                    secondary: '#7c3aed',
+                    accent: '#c084fc',
+                    accentHover: '#d8b4fe'
+                }
+            },
+            rose: {
+                light: {
+                    primary: '#e11d48',
+                    primaryHover: '#be123c',
+                    secondary: '#f43f5e',
+                    accent: '#ec4899',
+                    accentHover: '#db2777'
+                },
+                dark: {
+                    primary: '#f43f5e',
+                    primaryHover: '#fb7185',
+                    secondary: '#e11d48',
+                    accent: '#f472b6',
+                    accentHover: '#f9a8d4'
+                }
+            },
+            amber: {
+                light: {
+                    primary: '#d97706',
+                    primaryHover: '#b45309',
+                    secondary: '#f59e0b',
+                    accent: '#f97316',
+                    accentHover: '#ea580c'
+                },
+                dark: {
+                    primary: '#f59e0b',
+                    primaryHover: '#fbbf24',
+                    secondary: '#d97706',
+                    accent: '#fb923c',
+                    accentHover: '#fdba74'
+                }
+            },
+            cyan: {
+                light: {
+                    primary: '#0891b2',
+                    primaryHover: '#0e7490',
+                    secondary: '#06b6d4',
+                    accent: '#0284c7',
+                    accentHover: '#0369a1'
+                },
+                dark: {
+                    primary: '#06b6d4',
+                    primaryHover: '#22d3ee',
+                    secondary: '#0891b2',
+                    accent: '#38bdf8',
+                    accentHover: '#7dd3fc'
+                }
+            }
+        };
+        
+        function changePalette(paletteName) {
+            const body = document.body;
+            const isDark = body.classList.contains('dark-mode');
+            const colors = palettes[paletteName][isDark ? 'dark' : 'light'];
+            
+            // Helper function to convert hex to RGB
+            function hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+            }
+            
+            // Apply colors to CSS variables on both root and body
+            const root = document.documentElement;
+            root.style.setProperty('--primary-color', colors.primary);
+            root.style.setProperty('--primary-hover', colors.primaryHover);
+            root.style.setProperty('--secondary-color', colors.secondary);
+            root.style.setProperty('--primary-color-rgb', hexToRgb(colors.primary));
+            root.style.setProperty('--accent-color', colors.accent);
+            root.style.setProperty('--accent-hover', colors.accentHover);
+            
+            body.style.setProperty('--primary-color', colors.primary);
+            body.style.setProperty('--primary-hover', colors.primaryHover);
+            body.style.setProperty('--secondary-color', colors.secondary);
+            body.style.setProperty('--primary-color-rgb', hexToRgb(colors.primary));
+            body.style.setProperty('--accent-color', colors.accent);
+            body.style.setProperty('--accent-hover', colors.accentHover);
+            
+            // Save palette preference
+            localStorage.setItem('colorPalette', paletteName);
+            
+            // Update active state
+            document.querySelectorAll('.palette-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            const selectedOption = document.querySelector(`[data-palette="${paletteName}"]`);
+            if (selectedOption) {
+                selectedOption.classList.add('active');
+            }
+            
+            // Close menu
+            togglePaletteMenu();
+        }
+        
+        function togglePaletteMenu() {
+            const menu = document.getElementById('paletteMenu');
+            menu.classList.toggle('active');
+        }
+        
+        // Close palette menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('paletteMenu');
+            const button = document.querySelector('.palette-toggle');
+            
+            if (menu && button && !menu.contains(event.target) && !button.contains(event.target)) {
+                menu.classList.remove('active');
+            }
+        });
+        
+        // Theme Management
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.querySelector('.theme-toggle i');
+            const currentPalette = localStorage.getItem('colorPalette') || 'default';
+            
+            if (body.classList.contains('light-mode')) {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+                
+                // Apply dark mode colors for current palette
+                const colors = palettes[currentPalette].dark;
+                applyColors(colors);
+            } else {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+                
+                // Apply light mode colors for current palette
+                const colors = palettes[currentPalette].light;
+                applyColors(colors);
+            }
+        }
+        
+        // Helper function to apply colors
+        function applyColors(colors) {
+            // Helper function to convert hex to RGB
+            function hexToRgb(hex) {
+                const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : null;
+            }
+            
+            const root = document.documentElement;
+            const body = document.body;
+            
+            root.style.setProperty('--primary-color', colors.primary);
+            root.style.setProperty('--primary-hover', colors.primaryHover);
+            root.style.setProperty('--secondary-color', colors.secondary);
+            root.style.setProperty('--accent-color', colors.accent);
+            root.style.setProperty('--accent-hover', colors.accentHover);
+            root.style.setProperty('--primary-color-rgb', hexToRgb(colors.primary));
+            
+            body.style.setProperty('--primary-color', colors.primary);
+            body.style.setProperty('--primary-hover', colors.primaryHover);
+            body.style.setProperty('--secondary-color', colors.secondary);
+            body.style.setProperty('--accent-color', colors.accent);
+            body.style.setProperty('--accent-hover', colors.accentHover);
+            body.style.setProperty('--primary-color-rgb', hexToRgb(colors.primary));
+        }
+        
+        // Load saved theme and palette on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedPalette = localStorage.getItem('colorPalette') || 'default';
+            const body = document.body;
+            const themeIcon = document.querySelector('.theme-toggle i');
+            
+            body.classList.remove('light-mode', 'dark-mode');
+            body.classList.add(savedTheme + '-mode');
+            
+            if (savedTheme === 'dark') {
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            } else {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+            
+            // Apply saved palette
+            const colors = palettes[savedPalette][savedTheme];
+            applyColors(colors);
+            
+            // Mark active palette
+            const activeOption = document.querySelector(`[data-palette="${savedPalette}"]`);
+            if (activeOption) {
+                activeOption.classList.add('active');
+            }
+        });
+        
+        function refreshNews() {
+            const btn = event.target.closest('a');
+            const icon = btn.querySelector('i');
+            icon.classList.add('spinning');
+            
+            fetch('/api/refresh')
+                .then(response => response.json())
+                .then(data => {
+                    alert(`Refreshed ${data.articles_count} articles!`);
+                    location.reload();
+                })
+                .catch(error => {
+                    alert('Error refreshing news');
+                    console.error(error);
+                })
+                .finally(() => {
+                    icon.classList.remove('spinning');
+                });
+        }
+        
+        function toggleMobileMenu() {
+            const nav = document.getElementById('mainNav');
+            const menuToggle = document.querySelector('.mobile-menu-toggle');
+            nav.classList.toggle('mobile-nav-open');
+            
+            const icon = menuToggle.querySelector('i');
+            if (nav.classList.contains('mobile-nav-open')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
+        }
+        
+        function toggleMobileFilters() {
+            const filterBar = document.getElementById('mobileFilterBar');
+            filterBar.classList.toggle('mobile-filter-open');
+        }
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

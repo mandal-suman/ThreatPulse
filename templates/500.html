@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}500 - Internal Server Error{% endblock %}
+
+{% block content %}
+<div class="error-page">
+    <div class="error-content">
+        <i class="fas fa-server"></i>
+        <h2>500 - Internal Server Error</h2>
+        <p>Something went wrong on our end. Please try again later.</p>
+        <a href="/" class="btn-primary">
+            <i class="fas fa-home"></i> Go Home
+        </a>
+    </div>
+</div>
+{% endblock %}

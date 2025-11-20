@@ -1,0 +1,24 @@
+# Python Requirements for Cybersecurity News Web App
+
+# Web Framework
+Flask==3.0.0
+Werkzeug==3.0.1
+
+# RSS Feed Parsing
+feedparser==6.0.11
+
+# HTTP Requests
+requests==2.31.0
+
+# HTML Parsing for article content
+beautifulsoup4==4.12.2
+lxml==4.9.3
+
+# Production WSGI Server
+gunicorn==21.2.0
+
+# AI/ML
+google-generativeai==0.8.3
+
+# Development tools (optional)
+python-dotenv==1.0.0

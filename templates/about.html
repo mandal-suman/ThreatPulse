@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}About - ThreatPulse{% endblock %}
+
+{% block content %}
+<div class="about-page">
+    <div class="hero">
+        <h2><i class="fas fa-info-circle"></i> About ThreatPulse</h2>
+        <p class="subtitle">Your centralized source for cybersecurity news and updates</p>
+    </div>
+
+    <div class="about-content">
+        <section class="about-section">
+            <h3><i class="fas fa-bullseye"></i> Our Mission</h3>
+            <p>
+                ThreatPulse aggregates the latest cybersecurity news from multiple trusted sources,
+                providing security professionals, researchers, and enthusiasts with a single platform to
+                stay informed about threats, vulnerabilities, breaches, and industry developments.
+            </p>
+        </section>
+
+        <section class="about-section">
+            <h3><i class="fas fa-rss"></i> News Sources</h3>
+            <p>We aggregate news from the following reputable cybersecurity sources:</p>
+            <ul class="sources-list">
+                {% for source in sources %}
+                <li><i class="fas fa-check-circle"></i> {{ source }}</li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="about-section">
+            <h3><i class="fas fa-star"></i> Features</h3>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <i class="fas fa-sync-alt"></i>
+                    <h4>Real-time Updates</h4>
+                    <p>Articles are automatically refreshed every 15 minutes</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-filter"></i>
+                    <h4>Source Filtering</h4>
+                    <p>Filter news by specific sources to focus on what matters</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-code"></i>
+                    <h4>REST API</h4>
+                    <p>Access articles programmatically via our JSON API</p>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h4>Responsive Design</h4>
+                    <p>Works seamlessly across desktop, tablet, and mobile devices</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section">
+            <h3><i class="fas fa-terminal"></i> Technology Stack</h3>
+            <ul class="tech-list">
+                <li><strong>Backend:</strong> Python, Flask</li>
+                <li><strong>RSS Parsing:</strong> feedparser library</li>
+                <li><strong>Frontend:</strong> HTML5, CSS3, JavaScript</li>
+                <li><strong>Icons:</strong> Font Awesome</li>
+            </ul>
+        </section>
+
+        <section class="about-section">
+            <h3><i class="fas fa-code-branch"></i> API Documentation</h3>
+            <p>The following API endpoints are available:</p>
+            <div class="api-docs">
+                <div class="api-endpoint">
+                    <code>GET /api/articles</code>
+                    <p>Retrieve all articles in JSON format</p>
+                    <p class="api-params">Parameters: <code>source</code> (optional), <code>limit</code> (optional)</p>
+                </div>
+                <div class="api-endpoint">
+                    <code>GET /api/sources</code>
+                    <p>Get list of all available news sources</p>
+                </div>
+                <div class="api-endpoint">
+                    <code>GET /api/refresh</code>
+                    <p>Force refresh the articles cache</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-section">
+            <h3><i class="fas fa-envelope"></i> Contact & Contribute</h3>
+            <p>
+                This is an open-source project. Contributions, suggestions, and feedback are welcome!
+                Feel free to open issues or submit pull requests on GitHub.
+            </p>
+        </section>
+    </div>
+</div>
+{% endblock %}
